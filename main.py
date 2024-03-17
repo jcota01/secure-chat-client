@@ -5,7 +5,8 @@ from Crypto.PublicKey import RSA
 
 from login_ui import LoginWindow
 from chat_ui import ChatWindow
-from stubs import parse_account_file, login
+from stubs import login
+from utils.account import parse_account_file
 
 
 def main():
