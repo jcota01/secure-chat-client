@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+option go_package = "securechat-server/grpc";
+package main;
+
+service ClientServerComms {
+	rpc SignUp(SignUpRequest) returns (SignUpResponse);
+	rpc SignUpChallengeResponse(SignUpChallengeResponseRequest) returns (SignUpChallengeResponseResponse);
+	rpc Login(LoginRequest) returns (LoginResponse);
+	rpc FindUser(FindUserRequest) returns (FindUserResponse);
+}
+
+message SignUpRequest{
+	string username = 1;
+	bytes publicKey = 2;
+}
+
+message SignUpResponse{
+	fixed64 challenge = 1;
+}
+
+message SignUpChallengeResponseRequest{
+	fixed64 challenge_response = 1;
+}
+
+message SignUpChallengeResponseResponse{
+	// assume no error means success
+}
+
+message LoginRequest{
+	string username = 1;
+	fixed32 address = 2;
+	bytes digitalSignature = 3;
+}
+
+message LoginResponse{
+	// assume no error means success
+}
+
+message FindUserRequest{
+	string username = 1;
+	bytes digitalSignature = 2;
+}
+
+message FindUserResponse{
+	string username = 1;
+	fixed32 address = 2;
+}
