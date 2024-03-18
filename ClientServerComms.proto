@@ -12,7 +12,8 @@ service ClientServerComms {
 
 message SignUpRequest{
 	string username = 1;
-	bytes publicKey = 2;
+	bytes publicKeyLogin = 2;
+	bytes publicKeyChat = 3;
 }
 
 message SignUpResponse{
