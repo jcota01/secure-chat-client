@@ -1,1 +1,5 @@
+grpcio==1.62.1
+grpcio-tools==1.62.1
+netifaces==0.11.0
+protobuf==4.25.3
 pycryptodome==3.20.0
