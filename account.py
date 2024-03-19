@@ -9,7 +9,7 @@ from utils.ip import *
 from utils.crypto import *
 
 
-def login(username: str, keypair: RSA.RsaKey, preferred_ip: Optional[str] = None) -> bool:
+def login(username: str, keypair: RSA.RsaKey, preferred_ip: Optional[str] = None):
     assert keypair.has_private, 'Keypair must contain a private key'
 
     local_ips = get_local_ipv4_addresses()
@@ -27,17 +27,16 @@ def login(username: str, keypair: RSA.RsaKey, preferred_ip: Optional[str] = None
                                                    ";".join((username, chosen_ip)).encode('utf-8'),
                                                    keypair
                                                )))
-        return response
 
 
-def register(username: str) -> Tuple[str, RSA.RsaKey]:
+def register(username: str) -> Tuple[str, RSA.RsaKey, RSA.RsaKey]:
     keypair_login = generate_rsa_keypair()
     keypair_chat = generate_rsa_keypair()
     with grpc_channel.create_channel() as channel:
         stub = ClientServerComms_pb2_grpc.ClientServerCommsStub(channel)
         response: ClientServerComms_pb2.SignUpResponse = stub.Login(
             ClientServerComms_pb2.SignUpRequest(username=username,
-                                               publicKeyLogin=keypair_login.public_key(),
-                                                publicKeyChat=keypair_chat.public_key()
+                                               publicKeyLogin=keypair_login.public_key().export_key(),
+                                                publicKeyChat=keypair_chat.public_key().export_key()
                                                 ))
-        return response
+    return username, keypair_login, keypair_chat
