@@ -7,6 +7,7 @@ import ClientServerComms_pb2_grpc
 from login_ui import LoginWindow
 from chat_ui import ChatWindow
 from utils.account import parse_account_file
+from account import *
 
 
 def main():
@@ -16,13 +17,9 @@ def main():
     if os.path.isfile('account'):
         try:
             f = open('account', 'r')
-            account = parse_account_file(f.read())
+            username, keypair_login, keypair_chat = parse_account_file(f.read())
             f.close()
-            with grpc.insecure_channel("localhost:50050") as channel:
-                stub = ClientServerComms_pb2_grpc.ClientServerCommsStub(channel)
-                response = stub.Login(
-                    ClientServerComms_pb2.LoginRequest(username="", address=0x0, digitalSignature=bytes()))
-                print(response)
+            login(username, keypair_login)
             # if the server does not raise an exception login was successful
         except BaseException:
             # there was some error with login

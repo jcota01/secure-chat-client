@@ -5,8 +5,8 @@ from typing import Tuple, Optional
 
 from Crypto.PublicKey import RSA
 
-import stubs
-from stubs import parse_account_file, login, register
+from account import *
+from utils.account import parse_account_file, export_account_file
 
 
 class LoginWindow(tk.Tk):
@@ -30,7 +30,7 @@ class LoginWindow(tk.Tk):
             f = open('account', 'r')
             self.account = parse_account_file(f.read())
             f.close()
-            login(*self.account)
+            login(self.account[0], self.account[1])
             # if the server does not raise an exception login was successful
             # exit login window thread
             self.quit()
@@ -60,13 +60,13 @@ class RegisterWindow(tk.Toplevel):
         self.username_entry = tk.Entry(self)
         self.username_entry.pack()
 
-        self.register_button = tk.Button(self, text="Register", command=self.register)
+        self.register_button = tk.Button(self, text="Register", command=self.do_register)
         self.register_button.pack()
 
         self.cancel_button = tk.Button(self, text="Cancel", command=self.destroy)
         self.cancel_button.pack()
 
-    def register(self):
+    def do_register(self):
         username = self.username_entry.get()
 
         print("Register with username:", username)
@@ -76,7 +76,7 @@ class RegisterWindow(tk.Toplevel):
             print("Registered successfully")
             # save the account file to the default place
             f = open('account', 'w')
-            f.write(stubs.export_account_file(*self.account))
+            f.write(export_account_file(*self.account))
         except BaseException:
             # there was some error in registration
             print("Failed to register, perhaps try a different username")
