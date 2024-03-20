@@ -21,6 +21,7 @@ from utils.extensions import db
 
 account: Optional[Tuple[str, RSA.RsaKey, RSA.RsaKey]] = None
 
+
 def create_app():
     app = flask.Flask(__name__)
     app.config['SECRET_KEY'] = 'secret!'
@@ -43,8 +44,21 @@ def create_app():
         signature = base64.b64decode(payload['signature'].encode('utf-8'))
         known_user = KnownUser.query.get(from_username)
         if not known_user:
-            # TODO: get pubkey from server and store in DB
-            raise NotImplemented
+            with grpc_channel.create_channel() as channel:
+                stub = ClientServerComms_pb2_grpc.ClientServerCommsStub(channel)
+                response: ClientServerComms_pb2.FindUserResponse = stub.FindUser(
+                    ClientServerComms_pb2.FindUserRequest(
+                        username=from_username,
+                        digitalSignature=bytes()  # todo: do we need this signature with current server implementation?
+                    ))
+            if response.username == from_username:
+                known_user = KnownUser()
+                known_user.username = response.username
+                known_user.last_known_address = response.address
+                known_user.chat_id = response.publicKeyChat
+                db.session.add(known_user)
+                db.session.commit()
+                db.session.refresh(known_user)
         if crypto.verify_signature(message, signature, crypto.open_key_from_bytes(known_user.chat_public_key)):
             # signature matches OK
             # TODO: pass message to the UI
@@ -86,7 +100,8 @@ def main(app):
     if account is not None:
         chat_window = ChatWindow(app, account)
         with app.app_context():
-            users = KnownUser.query.join(Message, KnownUser.username == Message.other_user).group_by(KnownUser).order_by(desc(Message.timestamp)).all()
+            users = KnownUser.query.join(Message, KnownUser.username == Message.other_user).group_by(
+                KnownUser).order_by(desc(Message.timestamp)).all()
         chat_window.update_users_list(u.username for u in users)
         chat_window.mainloop()
 
