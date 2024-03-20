@@ -8,6 +8,7 @@ from sqlalchemy import desc
 from Crypto.PublicKey import RSA
 
 import ClientServerComms_pb2_grpc
+import utils.ip
 from database.models import KnownUser, Message
 from login_ui import LoginWindow
 from chat_ui import ChatWindow
@@ -32,7 +33,7 @@ def create_app():
 
 
 def run_app(app: flask.Flask):
-    app.run(host='0.0.0.0', port=6500)
+    app.run(host=get_local_ipv4_addresses()[0], port=utils.ip.RECEIVE_MESSAGES_PORT)
 
 
 def main(app):

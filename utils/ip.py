@@ -5,6 +5,7 @@ from netifaces import interfaces, ifaddresses, AF_INET
 We use fixed32 to represent IPv4 addresses on the server as an IPv4 address is made of 4 octets (bytes).
 This allows for greater performance and scalability on the server, with only a little overhead in each client. 
 """
+RECEIVE_MESSAGES_PORT = 6500
 def ipv4_to_fixed32(ipv4: str) -> int:
     assert re.fullmatch(
         r"^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$",
