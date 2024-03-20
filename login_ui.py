@@ -14,7 +14,7 @@ class LoginWindow(tk.Tk):
         super().__init__()
         self.title("Secure Chat Login")
         self.geometry("300x200")
-        self.account: Optional[Tuple[str, RSA.RsaKey]] = None
+        self.account: Optional[Tuple[str, RSA.RsaKey, RSA.RsaKey]] = None
 
         self.file_picker = tk.Button(self, text="Login with Account File", command=self.pick_file)
         self.file_picker.pack()

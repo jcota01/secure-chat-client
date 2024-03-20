@@ -59,7 +59,7 @@ def main(app):
         account = login_window.account
 
     if account is not None:
-        chat_window = ChatWindow(app)
+        chat_window = ChatWindow(app, account)
         with app.app_context():
             users = KnownUser.query.join(Message, KnownUser.username == Message.other_user).group_by(KnownUser).order_by(desc(Message.timestamp)).all()
         chat_window.update_users_list(u.username for u in users)

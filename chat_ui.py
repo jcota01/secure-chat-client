@@ -1,11 +1,17 @@
+import base64
+import json
 import tkinter as tk
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Tuple
 
 import flask
+import requests
 from sqlalchemy import asc
+from Crypto.PublicKey import RSA
 
-from database.models import Message
+import utils.ip
+from database.models import Message, KnownUser
+from utils import crypto
 
 
 class ChatWindow(tk.Tk):
@@ -39,10 +45,11 @@ class ChatWindow(tk.Tk):
         for message in messages:
             self.chat_display.insert(tk.END, ChatWindow.__format_message(message))
 
-    def __init__(self, app: flask.Flask):
+    def __init__(self, app: flask.Flask, account: Tuple[str, RSA.RsaKey, RSA.RsaKey]):
         super().__init__()
         self.title("Secure Chat")
         self.geometry("600x500")  # Set the window size
+        self.account = account
 
         # Frame for connected users with a scrollbar
         self.users_frame = tk.Frame(self, bg='lightgrey', width=150)
@@ -101,11 +108,25 @@ class ChatWindow(tk.Tk):
             self.app.db.session.commit()
             self.app.db.session.refresh(message)
         # send message to other user
-        pass
-        # Add message to chat display
-        self.chat_display.insert(tk.END, ChatWindow.__format_message(message))
-        # Clear input field
-        self.message_input.delete(0, tk.END)
+        user = KnownUser.query.get(self.selected_user)
+        their_ip = utils.ip.fixed32_to_ipv4(user.last_known_address)
+
+        # do crypto on the message
+        signature = crypto.create_signature(message, self.account[2])
+        payload = json.dumps({
+            'message': base64.b64encode(message).decode('utf-8'),
+            'from': self.account[0],
+            'signature': base64.b64encode(signature).decode('utf-8')
+        }).encode('utf-8')
+        encrypted_payload = crypto.encrypt_plaintext(payload, crypto.open_key_from_bytes(user.chat_public_key))
+        r = requests.post(f"http://{their_ip}:{utils.ip.RECEIVE_MESSAGES_PORT}/recv", data=encrypted_payload)
+        if not r.ok:
+            print("Error sending message")
+        else:
+            # Add message to chat display
+            self.chat_display.insert(tk.END, ChatWindow.__format_message(message))
+            # Clear input field
+            self.message_input.delete(0, tk.END)
 
     def on_focus_in(self, event):
         if self.message_input.get() == self.placeholder_text:
