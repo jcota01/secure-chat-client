@@ -1,3 +1,5 @@
+import base64
+import json
 import os
 import sys
 import threading
@@ -12,10 +14,12 @@ import utils.ip
 from database.models import KnownUser, Message
 from login_ui import LoginWindow
 from chat_ui import ChatWindow
+from utils import crypto
 from utils.account import parse_account_file
 from account import *
 from utils.extensions import db
 
+account: Optional[Tuple[str, RSA.RsaKey, RSA.RsaKey]] = None
 
 def create_app():
     app = flask.Flask(__name__)
@@ -29,6 +33,29 @@ def create_app():
     with app.app_context():
         db.create_all()
 
+    @app.post('/recv')
+    def recv_message():
+        encrypted_payload = flask.request.get_data()
+        decrypted_payload = crypto.decrypt_ciphertext(encrypted_payload, account[2])
+        payload = json.loads(decrypted_payload.decode('utf-8'))
+        message = base64.b64decode(payload['message'].encode('utf-8'))
+        from_username = base64.b64decode(payload['from'].encode('utf-8'))
+        signature = base64.b64decode(payload['signature'].encode('utf-8'))
+        known_user = KnownUser.query.get(from_username)
+        if not known_user:
+            # TODO: get pubkey from server and store in DB
+            raise NotImplemented
+        if crypto.verify_signature(message, signature, crypto.open_key_from_bytes(known_user.chat_public_key)):
+            # signature matches OK
+            # TODO: pass message to the UI
+            pass
+        else:
+            # signature match failed
+            # TODO: raise error?
+            pass
+
+    pass
+
     return app
 
 
@@ -37,8 +64,6 @@ def run_app(app: flask.Flask):
 
 
 def main(app):
-    account: Optional[Tuple[str, RSA.RsaKey, RSA.RsaKey]] = None
-
     # try to find login details in local storage
     if os.path.isfile('account'):
         try:
