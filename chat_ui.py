@@ -107,14 +107,14 @@ class ChatWindow(tk.Tk):
             self.app.db.session.add(message)
             self.app.db.session.commit()
             self.app.db.session.refresh(message)
+            user = KnownUser.query.get(self.selected_user)
         # send message to other user
-        user = KnownUser.query.get(self.selected_user)
         their_ip = utils.ip.fixed32_to_ipv4(user.last_known_address)
 
         # do crypto on the message
-        signature = crypto.create_signature(message, self.account[2])
+        signature = crypto.create_signature(message.content, self.account[2])
         payload = json.dumps({
-            'message': base64.b64encode(message).decode('utf-8'),
+            'message': base64.b64encode(message.content).decode('utf-8'),
             'from': self.account[0],
             'signature': base64.b64encode(signature).decode('utf-8')
         }).encode('utf-8')
