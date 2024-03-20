@@ -46,4 +46,5 @@ message FindUserRequest{
 message FindUserResponse{
 	string username = 1;
 	fixed32 address = 2;
+	bytes publicKeyChat = 3;
 }
