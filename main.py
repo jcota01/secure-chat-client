@@ -48,8 +48,8 @@ def create_app():
                 stub = ClientServerComms_pb2_grpc.ClientServerCommsStub(channel)
                 response: ClientServerComms_pb2.FindUserResponse = stub.FindUser(
                     ClientServerComms_pb2.FindUserRequest(
-                        username=from_username,
-                        digitalSignature=bytes()  # todo: do we need this signature with current server implementation?
+                        username=from_username.decode('utf-8'),
+                        digitalSignature=crypto.create_signature(from_username, account[1])
                     ))
             if response.username == from_username:
                 known_user = KnownUser()
