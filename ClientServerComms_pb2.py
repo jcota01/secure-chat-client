@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17\x43lientServerComms.proto\x12\x04main\"P\n\rSignUpRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x16\n\x0epublicKeyLogin\x18\x02 \x01(\x0c\x12\x15\n\rpublicKeyChat\x18\x03 \x01(\x0c\"#\n\x0eSignUpResponse\x12\x11\n\tchallenge\x18\x01 \x01(\x06\"<\n\x1eSignUpChallengeResponseRequest\x12\x1a\n\x12\x63hallenge_response\x18\x01 \x01(\x06\"!\n\x1fSignUpChallengeResponseResponse\"K\n\x0cLoginRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\x07\x12\x18\n\x10\x64igitalSignature\x18\x03 \x01(\x0c\"\x0f\n\rLoginResponse\"=\n\x0f\x46indUserRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x18\n\x10\x64igitalSignature\x18\x02 \x01(\x0c\"L\n\x10\x46indUserResponse\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\x07\x12\x15\n\rpublicKeyChat\x18\x03 \x01(\x0c\x32\x9d\x02\n\x11\x43lientServerComms\x12\x33\n\x06SignUp\x12\x13.main.SignUpRequest\x1a\x14.main.SignUpResponse\x12\x66\n\x17SignUpChallengeResponse\x12$.main.SignUpChallengeResponseRequest\x1a%.main.SignUpChallengeResponseResponse\x12\x30\n\x05Login\x12\x12.main.LoginRequest\x1a\x13.main.LoginResponse\x12\x39\n\x08\x46indUser\x12\x15.main.FindUserRequest\x1a\x16.main.FindUserResponseB\x18Z\x16securechat-server/grpcb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17\x43lientServerComms.proto\x12\x04main\"P\n\rSignUpRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x16\n\x0epublicKeyLogin\x18\x02 \x01(\x0c\x12\x15\n\rpublicKeyChat\x18\x03 \x01(\x0c\"#\n\x0eSignUpResponse\x12\x11\n\tchallenge\x18\x01 \x01(\x06\"<\n\x1eSignUpChallengeResponseRequest\x12\x1a\n\x12\x63hallenge_response\x18\x01 \x01(\x06\"!\n\x1fSignUpChallengeResponseResponse\"K\n\x0cLoginRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\x07\x12\x18\n\x10\x64igitalSignature\x18\x03 \x01(\x0c\"\x0f\n\rLoginResponse\"=\n\x0f\x46indUserRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x18\n\x10\x64igitalSignature\x18\x02 \x01(\x0c\"H\n\x10\x46indUserResponse\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\x07\x12\x11\n\tpublicKey\x18\x03 \x01(\x0c\x32\x9d\x02\n\x11\x43lientServerComms\x12\x33\n\x06SignUp\x12\x13.main.SignUpRequest\x1a\x14.main.SignUpResponse\x12\x66\n\x17SignUpChallengeResponse\x12$.main.SignUpChallengeResponseRequest\x1a%.main.SignUpChallengeResponseResponse\x12\x30\n\x05Login\x12\x12.main.LoginRequest\x1a\x13.main.LoginResponse\x12\x39\n\x08\x46indUser\x12\x15.main.FindUserRequest\x1a\x16.main.FindUserResponseB\x18Z\x16securechat-server/grpcb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -37,7 +37,7 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_FINDUSERREQUEST']._serialized_start=343
   _globals['_FINDUSERREQUEST']._serialized_end=404
   _globals['_FINDUSERRESPONSE']._serialized_start=406
-  _globals['_FINDUSERRESPONSE']._serialized_end=482
-  _globals['_CLIENTSERVERCOMMS']._serialized_start=485
-  _globals['_CLIENTSERVERCOMMS']._serialized_end=770
+  _globals['_FINDUSERRESPONSE']._serialized_end=478
+  _globals['_CLIENTSERVERCOMMS']._serialized_start=481
+  _globals['_CLIENTSERVERCOMMS']._serialized_end=766
 # @@protoc_insertion_point(module_scope)
