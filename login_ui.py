@@ -34,7 +34,7 @@ class LoginWindow(tk.Tk):
             # if the server does not raise an exception login was successful
             # exit login window thread
             self.quit()
-        except BaseException:
+        except BaseException as e:
             # there was some error with login
             print("Login error")
 

@@ -3,9 +3,11 @@ import json
 import os
 import sys
 import threading
+from datetime import datetime
 from typing import Tuple, Optional
 
 import flask
+from werkzeug.exceptions import abort
 from sqlalchemy import desc
 from Crypto.PublicKey import RSA
 
@@ -20,6 +22,7 @@ from account import *
 from utils.extensions import db
 
 account: Optional[Tuple[str, RSA.RsaKey, RSA.RsaKey]] = None
+chat_window: Optional[ChatWindow] = None
 
 
 def create_app():
@@ -36,6 +39,9 @@ def create_app():
 
     @app.post('/recv')
     def recv_message():
+        if chat_window is None:
+            # not ready to receive messages yet
+            abort(503)
         encrypted_payload = flask.request.get_data()
         decrypted_payload = crypto.decrypt_ciphertext(encrypted_payload, account[2])
         payload = json.loads(decrypted_payload.decode('utf-8'))
@@ -61,14 +67,19 @@ def create_app():
                 db.session.refresh(known_user)
         if crypto.verify_signature(message, signature, crypto.open_key_from_bytes(known_user.chat_public_key)):
             # signature matches OK
-            # TODO: pass message to the UI
+            m = Message()
+            m.content = message
+            m.other_user = known_user
+            m.timestamp = datetime.now()
+            m.recipient_is_me = True
+            db.session.add(m)
+            db.session.commit()
+            db.session.refresh(m)
+            chat_window.incoming_message(m)
             pass
         else:
             # signature match failed
-            # TODO: raise error?
-            pass
-
-    pass
+            print("Received message with bad signature!")
 
     return app
 
@@ -78,6 +89,8 @@ def run_app(app: flask.Flask):
 
 
 def main(app):
+    global account
+    global chat_window
     # try to find login details in local storage
     if os.path.isfile('account'):
         try:
@@ -87,7 +100,7 @@ def main(app):
             login(account[0], account[1])
 
             # if the server does not raise an exception login was successful
-        except BaseException:
+        except BaseException as e:
             # there was some error with login
             account = None
 

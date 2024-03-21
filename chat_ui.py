@@ -149,6 +149,9 @@ class ChatWindow(tk.Tk):
         # Handle any cleanup here
         self.destroy()
 
+    def incoming_message(self, message: Message):
+        self.switch_to_user(message.other_user)
+
 if __name__ == "__main__":
     app = ChatWindow()
     # For demonstration, simulate receiving a list of users from the server
