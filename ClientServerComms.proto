@@ -46,7 +46,7 @@ message FindUserRequest{
 message FindUserResponse{
 	string username = 1;
 	fixed32 address = 2;
-	bytes publicKey = 3;
+	bytes publicKeyChat = 3;
 }
 
 message DigitalSignature{
