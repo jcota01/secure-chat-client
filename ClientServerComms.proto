@@ -17,11 +17,11 @@ message SignUpRequest{
 }
 
 message SignUpResponse{
-	fixed64 challenge = 1;
+	bytes challenge = 1;
 }
 
 message SignUpChallengeResponseRequest{
-	fixed64 challenge_response = 1;
+	bytes challenge_response = 1;
 }
 
 message SignUpChallengeResponseResponse{
