@@ -1,10 +1,12 @@
 from typing import Tuple, Optional
 
+import grpc
 from Crypto.PublicKey import RSA
 
 import ClientServerComms_pb2
 import ClientServerComms_pb2_grpc
 import grpc_channel
+from utils import crypto
 from utils.ip import *
 from utils.crypto import *
 
@@ -20,13 +22,25 @@ def login(username: str, keypair: RSA.RsaKey, preferred_ip: Optional[str] = None
 
     with grpc_channel.create_channel() as channel:
         stub = ClientServerComms_pb2_grpc.ClientServerCommsStub(channel)
-        response: ClientServerComms_pb2.LoginResponse = stub.Login(
-            ClientServerComms_pb2.LoginRequest(username=username,
-                                               address=ipv4_to_fixed32(chosen_ip),
-                                               digitalSignature=create_signature(
-                                                   ";".join((username, chosen_ip)).encode('utf-8'),
-                                                   keypair
-                                               )))
+
+        # Create the digital signature
+        signature_data = ";".join((username, chosen_ip)).encode('utf-8')
+        digital_signature = create_signature(signature_data, keypair)
+
+        # Create the login request
+        login_request = ClientServerComms_pb2.LoginRequest(
+            username=username,
+            address=ipv4_to_fixed32(chosen_ip),
+            digitalSignatureUsername=username,
+            digitalSignatureSignature=digital_signature
+        )
+
+        # Make the gRPC call
+        try:
+            response = stub.Login(login_request)
+            # Handle response
+        except grpc.RpcError as e:
+            print(e)
 
 
 def register(username: str) -> Tuple[str, RSA.RsaKey, RSA.RsaKey]:
@@ -36,7 +50,6 @@ def register(username: str) -> Tuple[str, RSA.RsaKey, RSA.RsaKey]:
         stub = ClientServerComms_pb2_grpc.ClientServerCommsStub(channel)
         response: ClientServerComms_pb2.SignUpResponse = stub.Login(
             ClientServerComms_pb2.SignUpRequest(username=username,
-                                               publicKeyLogin=keypair_login.public_key().export_key(),
-                                                publicKeyChat=keypair_chat.public_key().export_key()
-                                                ))
+                                                publicKeyLogin=keypair_login.public_key().export_key(),
+                                                publicKeyChat=keypair_chat.public_key().export_key()))
     return username, keypair_login, keypair_chat
