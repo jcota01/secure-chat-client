@@ -29,11 +29,9 @@ message SignUpChallengeResponseResponse{
 }
 
 message LoginRequest{
-	reserved 3;
 	string username = 1;
 	fixed32 address = 2;
-	string digitalSignatureUsername = 4;
-	bytes digitalSignatureSignature = 5;
+	DigitalSignature digitalSignature = 3;
 }
 
 message LoginResponse{
@@ -41,14 +39,17 @@ message LoginResponse{
 }
 
 message FindUserRequest{
-	reserved 2;
 	string username = 1;
-	string digitalSignatureUsername = 3;
-	bytes digitalSignatureSignature = 4;
+	DigitalSignature digitalSignature = 2;
 }
 
 message FindUserResponse{
 	string username = 1;
 	fixed32 address = 2;
 	bytes publicKeyChat = 3;
+}
+
+message DigitalSignature{
+	string username = 1;
+	bytes signature = 2;
 }

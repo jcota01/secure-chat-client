@@ -26,13 +26,16 @@ def login(username: str, keypair: RSA.RsaKey, preferred_ip: Optional[str] = None
         # Create the digital signature
         signature_data = ";".join((username, chosen_ip)).encode('utf-8')
         digital_signature = create_signature(signature_data, keypair)
+        sig = ClientServerComms_pb2.DigitalSignature(
+            username=username,
+            signature=digital_signature
+        )
 
         # Create the login request
         login_request = ClientServerComms_pb2.LoginRequest(
             username=username,
             address=ipv4_to_fixed32(chosen_ip),
-            digitalSignatureUsername=username,
-            digitalSignatureSignature=digital_signature
+            digitalSignature=sig
         )
 
         # Make the gRPC call
