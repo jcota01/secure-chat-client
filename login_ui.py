@@ -77,7 +77,7 @@ class RegisterWindow(tk.Toplevel):
             # save the account file to the default place
             f = open('account', 'w')
             f.write(export_account_file(*self.account))
-        except BaseException:
+        except BaseException as e:
             # there was some error in registration
             print("Failed to register, perhaps try a different username")
 

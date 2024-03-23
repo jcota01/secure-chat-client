@@ -47,12 +47,13 @@ def login(username: str, keypair: RSA.RsaKey, preferred_ip: Optional[str] = None
 
 
 def register(username: str) -> Tuple[str, RSA.RsaKey, RSA.RsaKey]:
-    keypair_login = generate_rsa_keypair()
-    keypair_chat = generate_rsa_keypair()
+    keypair_login: RSA.RsaKey = generate_rsa_keypair()
+    keypair_chat: RSA.RsaKey = generate_rsa_keypair()
     with grpc_channel.create_channel() as channel:
         stub = ClientServerComms_pb2_grpc.ClientServerCommsStub(channel)
-        response: ClientServerComms_pb2.SignUpResponse = stub.Login(
+        response: ClientServerComms_pb2.SignUpResponse = stub.SignUp(
             ClientServerComms_pb2.SignUpRequest(username=username,
-                                                publicKeyLogin=keypair_login.public_key().export_key(),
-                                                publicKeyChat=keypair_chat.public_key().export_key()))
+                                                publicKeyLogin=keypair_login.public_key().export_key(format='DER'),
+                                                publicKeyChat=keypair_chat.public_key().export_key(format='DER')))
+        print(response.challenge)
     return username, keypair_login, keypair_chat

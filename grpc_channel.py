@@ -7,4 +7,4 @@ address.
 
 
 def create_channel():
-    return grpc.insecure_channel("localhost:6000")
+    return grpc.insecure_channel("127.0.0.1:6000")
