@@ -55,5 +55,9 @@ def register(username: str) -> Tuple[str, RSA.RsaKey, RSA.RsaKey]:
             ClientServerComms_pb2.SignUpRequest(username=username,
                                                 publicKeyLogin=keypair_login.public_key().export_key(format='DER'),
                                                 publicKeyChat=keypair_chat.public_key().export_key(format='DER')))
-        print(response.challenge)
+        challenge = int.from_bytes(decrypt_ciphertext(response.challenge, keypair_login), byteorder='little')
+        response = challenge - 1
+        response_signature = create_signature(response.to_bytes(64 // 8, byteorder='little'), keypair_login)
+        stub.SignUpChallengeResponse(ClientServerComms_pb2.SignUpChallengeResponseRequest(
+            challenge_response=response_signature))
     return username, keypair_login, keypair_chat
