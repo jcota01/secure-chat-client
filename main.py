@@ -85,7 +85,7 @@ def create_app():
 
 
 def run_app(app: flask.Flask):
-    app.run(host=get_local_ipv4_addresses()[0], port=utils.ip.RECEIVE_MESSAGES_PORT)
+    app.run(host=os.environ.get('BIND_IP') or get_local_ipv4_addresses()[0], port=utils.ip.RECEIVE_MESSAGES_PORT)
 
 
 def main(app):
@@ -97,7 +97,7 @@ def main(app):
             f = open('account', 'r')
             account = parse_account_file(f.read())
             f.close()
-            login(account[0], account[1])
+            login(account[0], account[1], os.environ.get('BIND_IP'))
 
             # if the server does not raise an exception login was successful
         except BaseException as e:

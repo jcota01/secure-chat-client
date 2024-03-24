@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 from tkinter import filedialog
 
@@ -30,7 +31,7 @@ class LoginWindow(tk.Tk):
             f = open('account', 'r')
             self.account = parse_account_file(f.read())
             f.close()
-            login(self.account[0], self.account[1])
+            login(self.account[0], self.account[1], os.environ.get('BIND_IP'))
             # if the server does not raise an exception login was successful
             # exit login window thread
             self.quit()
