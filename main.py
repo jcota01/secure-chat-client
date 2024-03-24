@@ -61,7 +61,7 @@ def create_app():
                 known_user = KnownUser()
                 known_user.username = response.username
                 known_user.last_known_address = response.address
-                known_user.chat_id = response.publicKeyChat
+                known_user.chat_public_key = response.publicKeyChat
                 db.session.add(known_user)
                 db.session.commit()
                 db.session.refresh(known_user)
