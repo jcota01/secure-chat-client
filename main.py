@@ -85,7 +85,9 @@ def create_app():
 
 
 def run_app(app: flask.Flask):
-    app.run(host=os.environ.get('BIND_IP') or get_local_ipv4_addresses()[0], port=utils.ip.RECEIVE_MESSAGES_PORT)
+    if 'BIND_IP' not in os.environ:
+        os.environ['BIND_IP'] = get_local_ipv4_addresses()[0]
+    app.run(host=os.environ.get('BIND_IP'), port=utils.ip.RECEIVE_MESSAGES_PORT)
 
 
 def main(app):

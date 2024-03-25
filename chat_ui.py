@@ -175,7 +175,16 @@ class ChatWindow(tk.Tk):
             except BaseException as e:
                 messagebox.showerror("Error", "Error finding the user. Do they exist?")
                 return
-        # TODO: process new user add to local db
+        known_user = KnownUser()
+        known_user.username = response.username
+        known_user.chat_public_key = response.publicKeyChat
+        known_user.last_known_address = response.address
+        with self.app.app_context():
+            self.app.db.session.add(known_user)
+            self.app.db.session.commit()
+            self.app.db.session.refresh(known_user)
+        self.users_listbox.insert(0, response.username)
+        self.switch_to_user(response.username)
 
 if __name__ == "__main__":
     app = ChatWindow()
