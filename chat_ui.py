@@ -2,6 +2,7 @@ import base64
 import json
 import tkinter as tk
 from datetime import datetime
+from tkinter import simpledialog, messagebox
 from typing import Optional, Tuple
 
 import flask
@@ -9,9 +10,13 @@ import requests
 from sqlalchemy import asc
 from Crypto.PublicKey import RSA
 
+import ClientServerComms_pb2
+import ClientServerComms_pb2_grpc
+import grpc_channel
 import utils.ip
 from database.models import Message, KnownUser
 from utils import crypto
+from utils.crypto import create_signature
 
 
 class ChatWindow(tk.Tk):
@@ -55,8 +60,8 @@ class ChatWindow(tk.Tk):
         self.users_frame = tk.Frame(self, bg='lightgrey', width=150)
         self.users_frame.pack(side=tk.LEFT, fill=tk.Y, padx=5, pady=5)
 
-        self.users_label = tk.Label(self.users_frame, text="Connected user:", bg='lightgrey')
-        self.users_label.pack()
+        self.find_button = tk.Button(self.users_frame, text="+ New Conversation", bg='blue', fg='white', command=self.find_user)
+        self.find_button.pack(fill=tk.BOTH)
 
         self.users_scrollbar = tk.Scrollbar(self.users_frame, orient=tk.VERTICAL)
         self.users_listbox = tk.Listbox(self.users_frame, activestyle="dotbox", bg='lightgrey',
@@ -151,6 +156,26 @@ class ChatWindow(tk.Tk):
 
     def incoming_message(self, message: Message):
         self.switch_to_user(message.other_user)
+
+    def find_user(self):
+        username = simpledialog.askstring("Enter Username", "Please enter the username of the person you want to talk "
+                                                            "to", parent=self)
+        with grpc_channel.create_channel() as channel:
+            stub = ClientServerComms_pb2_grpc.ClientServerCommsStub(channel)
+            digital_signature = create_signature(username.encode('utf-8'), self.account[1])
+            sig = ClientServerComms_pb2.DigitalSignature(
+                username=self.account[0],
+                signature=digital_signature
+            )
+            try:
+                response: ClientServerComms_pb2.FindUserResponse = stub.FindUser(ClientServerComms_pb2.FindUserRequest(
+                    username=username,
+                    digitalSignature=sig
+                ))
+            except BaseException as e:
+                messagebox.showerror("Error", "Error finding the user. Do they exist?")
+                return
+        # TODO: process new user add to local db
 
 if __name__ == "__main__":
     app = ChatWindow()
