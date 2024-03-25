@@ -6,6 +6,7 @@ from typing import Tuple, Optional
 
 from Crypto.PublicKey import RSA
 
+import challenge_nonce
 from account import *
 from utils.account import parse_account_file, export_account_file
 
@@ -31,7 +32,7 @@ class LoginWindow(tk.Tk):
             f = open('account', 'r')
             self.account = parse_account_file(f.read())
             f.close()
-            login(self.account[0], self.account[1], os.environ.get('BIND_IP'))
+            login(self.account[0], self.account[1], challenge_nonce.nonce, preferred_ip=os.environ.get('BIND_IP'))
             # if the server does not raise an exception login was successful
             # exit login window thread
             self.quit()
@@ -78,6 +79,9 @@ class RegisterWindow(tk.Toplevel):
             # save the account file to the default place
             f = open('account', 'w')
             f.write(export_account_file(*self.account))
+            import main
+            main.account = self.account
+            login(self.account[0], self.account[1], challenge_nonce.nonce, preferred_ip=os.environ.get('BIND_IP'))
         except BaseException as e:
             # there was some error in registration
             print("Failed to register, perhaps try a different username")

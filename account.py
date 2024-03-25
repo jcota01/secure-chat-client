@@ -11,7 +11,7 @@ from utils.ip import *
 from utils.crypto import *
 
 
-def login(username: str, keypair: RSA.RsaKey, preferred_ip: Optional[str] = None):
+def login(username: str, keypair: RSA.RsaKey, challenge_nonce: int, preferred_ip: Optional[str] = None):
     assert keypair.has_private, 'Keypair must contain a private key'
 
     local_ips = get_local_ipv4_addresses()
@@ -35,7 +35,8 @@ def login(username: str, keypair: RSA.RsaKey, preferred_ip: Optional[str] = None
         login_request = ClientServerComms_pb2.LoginRequest(
             username=username,
             address=ipv4_to_fixed32(chosen_ip),
-            digitalSignature=sig
+            digitalSignature=sig,
+            challenge_nonce=challenge_nonce
         )
 
         # Make the gRPC call

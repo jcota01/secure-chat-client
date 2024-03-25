@@ -1,6 +1,7 @@
 import base64
 import json
 import os
+import random
 import sys
 import threading
 from datetime import datetime
@@ -21,6 +22,8 @@ from utils.account import parse_account_file
 from account import *
 from utils.extensions import db
 
+import challenge_nonce
+
 account: Optional[Tuple[str, RSA.RsaKey, RSA.RsaKey]] = None
 chat_window: Optional[ChatWindow] = None
 
@@ -36,6 +39,17 @@ def create_app():
 
     with app.app_context():
         db.create_all()
+
+    @app.post('/challenge/<int:nonce>')
+    def ip_challenge(nonce: int):
+        if nonce != challenge_nonce.nonce:
+            challenge_nonce.nonce = random.randint(0, 2 ** 64)
+            abort(403)
+        challenge_nonce.nonce = random.randint(0, 2 ** 64)
+        challenge = int.from_bytes(decrypt_ciphertext(flask.request.get_data(), account[1]), byteorder='little')
+        response = challenge - 1
+        response_signature: bytes = create_signature(response.to_bytes(64 // 8, byteorder='little'), account[1])
+        return response_signature
 
     @app.post('/recv')
     def recv_message():
@@ -99,7 +113,7 @@ def main(app):
             f = open('account', 'r')
             account = parse_account_file(f.read())
             f.close()
-            login(account[0], account[1], os.environ.get('BIND_IP'))
+            login(account[0], account[1], challenge_nonce.nonce, preferred_ip=os.environ.get('BIND_IP'))
 
             # if the server does not raise an exception login was successful
         except BaseException as e:
@@ -122,6 +136,7 @@ def main(app):
 
 
 if __name__ == "__main__":
+    challenge_nonce.nonce = random.randint(0, 2 ** 64)
     app = create_app()
     t1 = threading.Thread(target=run_app, args=(app,))
     t1.daemon = True

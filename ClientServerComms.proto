@@ -32,6 +32,7 @@ message LoginRequest{
 	string username = 1;
 	fixed32 address = 2;
 	DigitalSignature digitalSignature = 3;
+	fixed64 challenge_nonce = 4;
 }
 
 message LoginResponse{
