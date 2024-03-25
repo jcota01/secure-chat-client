@@ -32,6 +32,8 @@ class LoginWindow(tk.Tk):
             f = open('account', 'r')
             self.account = parse_account_file(f.read())
             f.close()
+            import current_account
+            current_account.account = self.account
             login(self.account[0], self.account[1], challenge_nonce.nonce, preferred_ip=os.environ.get('BIND_IP'))
             # if the server does not raise an exception login was successful
             # exit login window thread
@@ -42,11 +44,13 @@ class LoginWindow(tk.Tk):
 
     def open_register_window(self):
         # Open the Register Window
+        import current_account
         register_window = RegisterWindow()
         register_window.mainloop()
         if register_window.account is not None:
             # they registered ok
             self.account = register_window.account
+            current_account.account = self.account
             self.quit()
 
 
@@ -70,7 +74,7 @@ class RegisterWindow(tk.Toplevel):
 
     def do_register(self):
         username = self.username_entry.get()
-
+        import current_account
         print("Register with username:", username)
         try:
             self.account = register(username)
@@ -79,8 +83,7 @@ class RegisterWindow(tk.Toplevel):
             # save the account file to the default place
             f = open('account', 'w')
             f.write(export_account_file(*self.account))
-            import main
-            main.account = self.account
+            current_account.account = self.account
             login(self.account[0], self.account[1], challenge_nonce.nonce, preferred_ip=os.environ.get('BIND_IP'))
         except BaseException as e:
             # there was some error in registration

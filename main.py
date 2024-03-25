@@ -23,8 +23,8 @@ from account import *
 from utils.extensions import db
 
 import challenge_nonce
+import current_account
 
-account: Optional[Tuple[str, RSA.RsaKey, RSA.RsaKey]] = None
 chat_window: Optional[ChatWindow] = None
 
 
@@ -42,25 +42,27 @@ def create_app():
 
     @app.post('/challenge/<int:nonce>')
     def ip_challenge(nonce: int):
+        import current_account
         if nonce != challenge_nonce.nonce:
             challenge_nonce.nonce = random.randint(0, 2 ** 64)
             abort(403)
         challenge_nonce.nonce = random.randint(0, 2 ** 64)
-        challenge = int.from_bytes(decrypt_ciphertext(flask.request.get_data(), account[1]), byteorder='little')
+        challenge = int.from_bytes(decrypt_ciphertext(flask.request.get_data(), current_account.account[1]), byteorder='little')
         response = challenge - 1
-        response_signature: bytes = create_signature(response.to_bytes(64 // 8, byteorder='little'), account[1])
+        response_signature: bytes = create_signature(response.to_bytes(64 // 8, byteorder='little'), current_account.account[1])
         return response_signature
 
     @app.post('/recv')
     def recv_message():
+        import current_account
         if chat_window is None:
             # not ready to receive messages yet
             abort(503)
         encrypted_payload = flask.request.get_data()
-        decrypted_payload = crypto.decrypt_ciphertext(encrypted_payload, account[2])
+        decrypted_payload = crypto.decrypt_ciphertext(encrypted_payload, current_account.account[2])
         payload = json.loads(decrypted_payload.decode('utf-8'))
         message = base64.b64decode(payload['message'].encode('utf-8'))
-        from_username = base64.b64decode(payload['from'].encode('utf-8'))
+        from_username = payload['from']
         signature = base64.b64decode(payload['signature'].encode('utf-8'))
         known_user = KnownUser.query.get(from_username)
         if not known_user:
@@ -69,7 +71,7 @@ def create_app():
                 response: ClientServerComms_pb2.FindUserResponse = stub.FindUser(
                     ClientServerComms_pb2.FindUserRequest(
                         username=from_username.decode('utf-8'),
-                        digitalSignature=crypto.create_signature(from_username, account[1])
+                        digitalSignature=crypto.create_signature(from_username, current_account.account[1])
                     ))
             if response.username == from_username:
                 known_user = KnownUser()
@@ -83,17 +85,17 @@ def create_app():
             # signature matches OK
             m = Message()
             m.content = message
-            m.other_user = known_user
+            m.other_user = known_user.username
             m.timestamp = datetime.now()
             m.recipient_is_me = True
             db.session.add(m)
             db.session.commit()
             db.session.refresh(m)
             chat_window.incoming_message(m)
-            pass
+            return 'ok'
         else:
             # signature match failed
-            print("Received message with bad signature!")
+            abort(500, "Received message with bad signature!")
 
     return app
 
@@ -105,29 +107,29 @@ def run_app(app: flask.Flask):
 
 
 def main(app):
-    global account
     global chat_window
+    import current_account
     # try to find login details in local storage
     if os.path.isfile('account'):
         try:
             f = open('account', 'r')
-            account = parse_account_file(f.read())
+            current_account.account = parse_account_file(f.read())
             f.close()
-            login(account[0], account[1], challenge_nonce.nonce, preferred_ip=os.environ.get('BIND_IP'))
+            login(current_account.account[0], current_account.account[1], challenge_nonce.nonce, preferred_ip=os.environ.get('BIND_IP'))
 
             # if the server does not raise an exception login was successful
         except BaseException as e:
             # there was some error with login
-            account = None
+            current_account.account = None
 
-    if account is None:
+    if current_account.account is None:
         login_window = LoginWindow()
         login_window.mainloop()
         login_window.quit()
-        account = login_window.account
+        current_account.account = login_window.account
 
-    if account is not None:
-        chat_window = ChatWindow(app, account)
+    if current_account.account is not None:
+        chat_window = ChatWindow(app, current_account.account)
         with app.app_context():
             users = KnownUser.query.join(Message, KnownUser.username == Message.other_user).group_by(
                 KnownUser).order_by(desc(Message.timestamp)).all()

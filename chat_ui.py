@@ -34,9 +34,6 @@ class ChatWindow(tk.Tk):
         return f"[{message.timestamp.strftime('%H:%M:%S')}][{message.other_user if message.recipient_is_me else 'You'}] {message.content.decode('utf-8')}"
 
     def switch_to_user(self, user: str):
-        if self.selected_user == user:
-            return
-
         self.chat_display.configure(state=tk.NORMAL)
         self.chat_display.delete(0, tk.END)
         self.message_input.delete(0, tk.END)
