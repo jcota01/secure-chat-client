@@ -68,10 +68,14 @@ def create_app():
         if not known_user:
             with grpc_channel.create_channel() as channel:
                 stub = ClientServerComms_pb2_grpc.ClientServerCommsStub(channel)
+                sig = ClientServerComms_pb2.DigitalSignature(
+                    username=current_account.account[0],
+                    signature=crypto.create_signature(from_username.encode('utf-8'), current_account.account[1])
+                )
                 response: ClientServerComms_pb2.FindUserResponse = stub.FindUser(
                     ClientServerComms_pb2.FindUserRequest(
                         username=from_username,
-                        digitalSignature=crypto.create_signature(from_username.encode('utf-8'), current_account.account[1])
+                        digitalSignature=sig
                     ))
             if response.username == from_username:
                 known_user = KnownUser()
