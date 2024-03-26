@@ -71,7 +71,7 @@ def create_app():
                 response: ClientServerComms_pb2.FindUserResponse = stub.FindUser(
                     ClientServerComms_pb2.FindUserRequest(
                         username=from_username,
-                        digitalSignature=crypto.create_signature(from_username, current_account.account[1])
+                        digitalSignature=crypto.create_signature(from_username.encode('utf-8'), current_account.account[1])
                     ))
             if response.username == from_username:
                 known_user = KnownUser()
