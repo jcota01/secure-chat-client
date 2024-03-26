@@ -10,7 +10,7 @@ address.
 """
 
 
-def create_channel(src_address: Optional[str] = None):
-    with open('ca-cert.pem', 'rb') as f:
+def create_channel():
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ca-cert.pem'), 'rb') as f:
         ca_cert = f.read()
     return grpc.secure_channel('127.0.0.1:6000', grpc.ssl_channel_credentials(root_certificates=ca_cert))
