@@ -70,7 +70,7 @@ def create_app():
                 stub = ClientServerComms_pb2_grpc.ClientServerCommsStub(channel)
                 response: ClientServerComms_pb2.FindUserResponse = stub.FindUser(
                     ClientServerComms_pb2.FindUserRequest(
-                        username=from_username.decode('utf-8'),
+                        username=from_username,
                         digitalSignature=crypto.create_signature(from_username, current_account.account[1])
                     ))
             if response.username == from_username:
