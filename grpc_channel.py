@@ -11,4 +11,6 @@ address.
 
 
 def create_channel(src_address: Optional[str] = None):
-    return grpc.insecure_channel('127.0.0.1:6000')
+    with open('ca-cert.pem', 'rb') as f:
+        ca_cert = f.read()
+    return grpc.secure_channel('127.0.0.1:6000', grpc.ssl_channel_credentials(root_certificates=ca_cert))
