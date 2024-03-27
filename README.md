@@ -3,7 +3,17 @@
 ![alt text](https://github.com/abdullahomran9/SecureChat/blob/main/image.png)
 ![alt text](https://github.com/abdullahomran9/SecureChat/blob/main/image2.png)
 
+## How to Run
 
+1. Create a virtualenv and install the packages from `requirements.txt`. Activate the virtualenv.
+2. *(Optional)* Export the enivronment variable BIND_IP with the IP address you want your client to have. This can be the IP address of any NIC, or any 127.x.y.z local loopback address. A sensible default will be chosen if not specified, but as each chat client **MUST** have a unique bind IP to operate correctly, this is useful for testing locally.
+3. Run ./main.py using your virtualenv.
+```bash
+python3 -m venv .venv
+export BIND_IP=127.0.0.100
+python3 ./main.py
+```
+The client is hard-coded to use a server on `127.0.0.1` (localhost IPv4) for development reasons. If you want to use a different server address, you will need to update the code in `grpc_channel.py` and re-generate your TLS certificates for the new IP address or DNS name.
 
 ## Overview
 
