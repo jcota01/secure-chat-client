@@ -12,15 +12,16 @@ service ClientServerComms {
 
 message SignUpRequest{
 	string username = 1;
-	bytes publicKey = 2;
+	bytes publicKeyLogin = 2;
+	bytes publicKeyChat = 3;
 }
 
 message SignUpResponse{
-	fixed64 challenge = 1;
+	bytes challenge = 1;
 }
 
 message SignUpChallengeResponseRequest{
-	fixed64 challenge_response = 1;
+	bytes challenge_response = 1;
 }
 
 message SignUpChallengeResponseResponse{
@@ -30,7 +31,8 @@ message SignUpChallengeResponseResponse{
 message LoginRequest{
 	string username = 1;
 	fixed32 address = 2;
-	bytes digitalSignature = 3;
+	DigitalSignature digitalSignature = 3;
+	fixed64 challenge_nonce = 4;
 }
 
 message LoginResponse{
@@ -39,10 +41,16 @@ message LoginResponse{
 
 message FindUserRequest{
 	string username = 1;
-	bytes digitalSignature = 2;
+	DigitalSignature digitalSignature = 2;
 }
 
 message FindUserResponse{
 	string username = 1;
 	fixed32 address = 2;
+	bytes publicKeyChat = 3;
+}
+
+message DigitalSignature{
+	string username = 1;
+	bytes signature = 2;
 }
